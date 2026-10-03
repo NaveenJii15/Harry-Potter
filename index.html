@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mech-A-Verse | An Invitation</title>
+<meta name="theme-color" content="#07090f">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=EB+Garamond:ital@0;1&family=IM+Fell+English:ital@0;1&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#e8c872; --gold2:#b8913a; --ink:#07090f; --txt:#f3e7c4;
+    --head:'Cinzel Decorative',Georgia,serif; --glow:rgba(232,200,114,.45);
+  }
+  body.mech{
+    --gold:#ffb347; --gold2:#c9762a; --txt:#e6f1f8;
+    --head:'Orbitron','Cinzel Decorative',sans-serif; --glow:rgba(255,179,71,.5);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:var(--ink);color:var(--txt);font-family:'EB Garamond',Georgia,serif;overflow:hidden;transition:color 1.5s}
+
+  /* ---------------- Enter screen ---------------- */
+  #enter{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
+    background:radial-gradient(ellipse at 50% 30%,#12234a 0%,#05070d 70%);text-align:center;padding:24px;transition:opacity 1.2s}
+  #enter h1{font-family:'Cinzel Decorative',serif;font-weight:700;font-size:clamp(30px,8vw,64px);color:var(--gold);letter-spacing:.06em;
+    text-shadow:0 0 26px rgba(232,200,114,.45)}
+  #enter p{font-style:italic;font-size:clamp(16px,3.8vw,23px);opacity:.88}
+  #enter small{opacity:.55;font-size:14px;letter-spacing:.08em}
+  #enter.hide{opacity:0;pointer-events:none}
+
+  .btn{font-family:var(--head);font-size:clamp(13px,3.4vw,17px);letter-spacing:.1em;color:#1a1204;cursor:pointer;
+    background:linear-gradient(180deg,#f6dd96,#c99d44);border:1px solid #f9e8b6;border-radius:999px;padding:14px 30px;
+    box-shadow:0 0 22px rgba(232,200,114,.35);transition:transform .25s,box-shadow .25s;animation:rise 1s both}
+  body.mech .btn{background:linear-gradient(180deg,#ffd089,#d9822c);border-color:#ffe0b0;box-shadow:0 0 22px rgba(255,179,71,.4)}
+  .btn:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 0 36px var(--glow)}
+  .btn.ghost{background:rgba(8,12,24,.55);color:var(--gold);border:1px solid var(--gold2);box-shadow:none}
+
+  /* ---------------- Stage (media layer, shared by all scenes) ---------------- */
+  #stage{position:fixed;inset:0;z-index:1;overflow:hidden;background:#000;transition:opacity .8s ease}
+  body.dim #stage, body.dim #ui, body.dim #sub{opacity:0}
+  #fb{position:absolute;inset:0;transition:background 1s}
+  .fb-castle{background:radial-gradient(ellipse at 50% 108%,rgba(255,170,70,.2),transparent 55%),linear-gradient(180deg,#050a18 0%,#0c1a33 55%,#101a2c 100%)}
+  .fb-warm{background:radial-gradient(ellipse at 50% 70%,rgba(255,170,70,.32),transparent 60%),linear-gradient(180deg,#120904 0%,#2a170a 100%)}
+  .fb-hall{background:radial-gradient(ellipse at 50% 100%,rgba(255,160,60,.35),transparent 60%),linear-gradient(180deg,#1a0508 0%,#3a0d12 100%)}
+  .fb-mech{background:radial-gradient(ellipse at 50% 90%,rgba(255,150,40,.28),transparent 55%),radial-gradient(ellipse at 20% 10%,rgba(80,170,230,.18),transparent 50%),linear-gradient(180deg,#080d14 0%,#16202c 100%)}
+  #blur{position:absolute;inset:-6%;width:112%;height:112%;object-fit:cover;filter:blur(28px) brightness(.55);display:none}
+  #pic,#vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;background:transparent}
+  .fog{position:absolute;left:-20%;right:-20%;bottom:0;height:42%;pointer-events:none;
+    background:radial-gradient(ellipse at 30% 100%,rgba(190,205,230,.22),transparent 60%),radial-gradient(ellipse at 75% 100%,rgba(190,205,230,.18),transparent 55%);
+    animation:drift 18s ease-in-out infinite alternate}
+  @keyframes drift{from{transform:translateX(-4%)}to{transform:translateX(4%)}}
+  .vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.62) 100%)}
+  #scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.62) 100%)}
+  body[data-pos=topleft] #scrim{background:linear-gradient(135deg,rgba(0,0,0,.6) 0%,transparent 55%)}
+  body[data-pos=right] #scrim{background:linear-gradient(270deg,rgba(0,0,0,.66) 0%,transparent 70%)}
+  body[data-pos=center] #scrim{background:radial-gradient(ellipse at center,rgba(0,0,0,.55),transparent 75%)}
+
+  /* mechanical theme extras */
+  #grid{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity 3s;
+    background-image:linear-gradient(rgba(111,211,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(111,211,255,.09) 1px,transparent 1px);
+    background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 85%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 85%)}
+  #gears{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity 3s;color:#ffb347;overflow:hidden}
+  body.mech #grid{opacity:1} body.mech #gears{opacity:.32}
+  #gears svg{position:absolute;animation:spin 46s linear infinite}
+  #gears svg:nth-child(2){animation-direction:reverse;animation-duration:32s}
+  #gears svg:nth-child(3){animation-duration:24s}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  canvas#sparks{position:fixed;inset:0;z-index:5;pointer-events:none}
+
+  /* ---------------- Text layer ---------------- */
+  #ui{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+    padding:0 22px 8%;text-align:center;gap:20px;transition:opacity .8s;pointer-events:none}
+  #ui > *{pointer-events:auto}
+  body[data-pos=topleft] #ui{justify-content:flex-start;align-items:flex-start;text-align:left;padding:7% 6% 0}
+  body[data-pos=right] #ui{justify-content:center;align-items:flex-end;padding:0 6% 0 0}
+  body[data-pos=right] #cap, body[data-pos=right] #btns{max-width:46vw}
+  body[data-pos=center] #ui{justify-content:center}
+  @media (max-width:760px){
+    body[data-pos=right] #ui{align-items:center;justify-content:flex-end;padding:0 22px 8%}
+    body[data-pos=right] #cap, body[data-pos=right] #btns{max-width:100%}
+    body[data-pos=right] #scrim{background:linear-gradient(180deg,transparent 15%,rgba(0,0,0,.78) 100%)}
+    body[data-pos=topleft] #ui{padding:9% 7% 0}
+  }
+  #cap{display:flex;flex-direction:column;gap:14px;align-items:inherit}
+  #btns{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;min-height:0}
+
+  .line{opacity:0;animation:write var(--dur,1.8s) ease-in-out var(--delay,0s) forwards;text-shadow:0 2px 14px rgba(0,0,0,.95)}
+  @keyframes write{from{opacity:1;clip-path:inset(-30% 100% -30% -2%)}to{opacity:1;clip-path:inset(-30% -4% -30% -2%)}}
+  .h{font-family:var(--head);font-size:clamp(21px,5.2vw,44px);color:var(--gold);letter-spacing:.05em;text-shadow:0 2px 18px rgba(0,0,0,.9),0 0 26px var(--glow)}
+  .p{font-style:italic;font-size:clamp(17px,3.8vw,26px)}
+  .big{font-family:var(--head);font-size:clamp(21px,5.4vw,48px);color:var(--gold);letter-spacing:.06em;line-height:1.3;text-transform:uppercase;
+    text-shadow:0 2px 18px rgba(0,0,0,.95),0 0 30px var(--glow)}
+  .title{font-family:var(--head);font-size:clamp(32px,10.5vw,112px);letter-spacing:.12em;line-height:1.1;font-weight:700;text-shadow:none;
+    background:linear-gradient(180deg,#fff3c8 0%,#f0b84a 50%,#8a5a14 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 22px var(--glow))}
+  .tag{font-family:var(--head);letter-spacing:.38em;color:var(--gold);font-size:clamp(13px,3.2vw,26px)}
+  .event{letter-spacing:.2em;font-size:clamp(14px,3vw,20px);opacity:.85}
+
+  /* parchment letter (scene 6) */
+  .card-parch{background:linear-gradient(180deg,#f3e5bf,#e1ca97);color:#3a2410;border-radius:6px;padding:clamp(22px,5vw,46px) clamp(26px,6vw,70px);
+    box-shadow:inset 0 0 70px rgba(120,70,20,.55),0 22px 70px rgba(0,0,0,.75);max-width:min(88vw,620px);align-items:center!important}
+  .ink-h{font-family:'IM Fell English',Georgia,serif;font-size:clamp(20px,4.6vw,38px);letter-spacing:.08em;text-transform:uppercase;color:#5a1a12;text-shadow:none}
+  .ink-p{font-family:'IM Fell English',Georgia,serif;font-style:italic;font-size:clamp(18px,4vw,30px);color:#3a2410;text-shadow:none}
+  .seal{width:54px;height:54px;border-radius:50%;margin-top:6px;background:radial-gradient(circle at 35% 30%,#d6403a,#7a0f12 70%);
+    box-shadow:0 3px 10px rgba(0,0,0,.5),inset 0 0 10px rgba(255,200,120,.35);display:flex;align-items:center;justify-content:center;color:#f0c870;font-size:22px;text-shadow:none}
+
+  /* Aarti Ma'am profile card (scene 9) */
+  .name{font-family:var(--head);font-size:clamp(24px,5.6vw,46px);color:var(--gold);letter-spacing:.14em;text-transform:uppercase}
+  .role{letter-spacing:.34em;font-size:clamp(12px,2.6vw,17px);text-transform:uppercase;opacity:.9}
+  .rule{width:min(240px,50vw);height:1px;background:linear-gradient(90deg,var(--gold),transparent);align-self:flex-start}
+  .quote{font-family:'IM Fell English',Georgia,serif;font-style:italic;font-size:clamp(19px,4.2vw,30px);max-width:min(80vw,440px);color:#f5e7bd}
+
+  /* subtitles + controls */
+  #sub{position:fixed;left:50%;bottom:13%;transform:translateX(-50%);z-index:20;max-width:min(92vw,820px);text-align:center;
+    font-size:clamp(16px,3.6vw,24px);line-height:1.35;background:rgba(0,0,0,.58);padding:8px 18px;border-radius:10px;
+    opacity:0;transition:opacity .4s;pointer-events:none;text-shadow:0 1px 6px #000}
+  #sub.on{opacity:1}
+  body.dim #sub{opacity:0!important}
+  .ctl{position:fixed;top:14px;z-index:60;width:44px;height:44px;border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;
+    background:rgba(8,12,24,.7);border:1px solid var(--gold2);color:var(--gold);font-size:17px;font-family:var(--head)}
+  #mute{right:14px} #cc{right:66px;font-size:13px}
+  #cc.off{opacity:.45}
+  #skip{position:fixed;left:14px;bottom:14px;z-index:60;display:none;background:none;border:none;color:var(--txt);opacity:.55;cursor:pointer;
+    font-family:inherit;font-size:15px;letter-spacing:.12em;padding:8px}
+  #skip:hover{opacity:1}
+  #toast{position:fixed;left:50%;top:18%;transform:translateX(-50%);z-index:40;font-style:italic;font-size:clamp(18px,4vw,26px);color:var(--gold);
+    text-align:center;opacity:0;transition:opacity .6s;pointer-events:none;max-width:88vw;text-shadow:0 2px 14px #000}
+  #toast.on{opacity:1}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){ .fog,#gears svg{animation:none} }
+</style>
+</head>
+<body data-pos="bottom">
+
+<!-- Landing: one tap (also unlocks sound in the browser) -->
+<div id="enter">
+  <h1>Mech-A-Verse</h1>
+  <p>A letter has arrived at midnight…</p>
+  <button class="btn" id="enterBtn">Enter the Castle ✦</button>
+  <small>🔊 Please turn your sound on</small>
+</div>
+
+<button class="ctl" id="cc" title="Subtitles on/off">CC</button>
+<button class="ctl" id="mute" title="Sound on/off">🔊</button>
+<button id="skip">Skip ›</button>
+<div id="toast"></div>
+
+<!-- Shared media stage: every scene swaps its own image / video in here -->
+<div id="stage">
+  <div id="fb" class="fb-castle"></div>
+  <img id="blur" alt="">
+  <img id="pic" alt="">
+  <video id="vid" playsinline preload="auto"></video>
+  <div class="fog"></div>
+  <div class="vignette"></div>
+  <div id="scrim"></div>
+</div>
+<div id="grid"></div>
+<div id="gears"></div>
+<canvas id="sparks"></canvas>
+
+<div id="ui"><div id="cap"></div><div id="btns"></div></div>
+<div id="sub"></div>
+
+<!-- Music: royalty-free tracks go in /assets (see README). Both are optional. -->
+<audio id="bgm1" loop preload="auto" src="assets/music.mp3"></audio>
+<audio id="bgm2" loop preload="none" src="assets/music-mech.mp3"></audio>
+
+<script>
+/* =====================================================================
+   SETTINGS: edit these
+   ===================================================================== */
+const CONFIG = {
+  HER: "Aarti Ma'am",
+  HIS: "Naveen",
+  WHATSAPP_NUMBER: "",   // optional: country code + number, no "+" (e.g. "919XXXXXXXXX"). Adds a "Send my reply" button on the last screen.
+  REPLY_TEXT: "Yes! I'd be honoured to be your GYS for Mech-A-Verse ✦",
+  EVENT_LINE: "",        // optional line under the final title, e.g. "Mech-A-Verse · 12 Nov · Main Auditorium"
+  SHOW_THINK: false,     // true adds a playful "Let me think ✦" button next to the Yes buttons
+  SUBTITLES: true
+};
+
+/* =====================================================================
+   SCENES (in the order they play). "media" = file name in /assets without extension.
+   lines: at = seconds after the scene starts. subs: at/dur = seconds into the video.
+   ===================================================================== */
+const H = CONFIG.HER, N = CONFIG.HIS;
+const SCENES = [
+ { media:'scene1', fb:'castle',
+   lines:[{at:2.5,cls:'h',text:'The gates are opening…'},{at:4.5,cls:'p',text:`${H}, something magical awaits you inside.`}],
+   btns:{at:7,list:[{text:'Step Inside ✦'}]} },
+
+ { media:'scene2', fb:'castle',
+   lines:[{at:2.5,cls:'h',text:'A castle older than memory…'},{at:4.5,cls:'p',text:'Every window glows for those who are expected.'}],
+   btns:{at:7,list:[{text:'Fly Closer ✦'}]} },
+
+ { media:'scene3', fb:'warm',
+   lines:[{at:2.5,cls:'h',text:'Down the candlelit corridor…'},{at:4.5,cls:'p',text:'The portraits whisper. The candles lead the way.'}],
+   btns:{at:7,list:[{text:'Walk On ✦'}]} },
+
+ { media:'scene4', fb:'warm',
+   lines:[{at:2.5,cls:'h',text:"The Headmaster's Office"},{at:4.5,cls:'p',text:'Some doors open only when they are meant to.'}],
+   btns:{at:7,list:[{text:'Knock ✦'}]} },
+
+ { media:'scene5', fb:'warm', voice:true,
+   subs:[
+     {at:4, dur:5, text:`${H}… I believe a young wizard has a rather important request for you.`},
+     {at:10,dur:4, text:'The Mech-A-Verse awaits its next chapter…'},
+     {at:14,dur:5, text:'And every promising wizard needs someone experienced to guide them.'},
+     {at:20,dur:4, text:'I believe you may be the guide he is looking for.'}],
+   btns:{at:26,list:[{text:'Continue ✦'}]} },
+
+ { media:'scene6', fb:'warm', card:'parch',
+   lines:[{at:3,cls:'ink-h',text:"Headmaster's Special Order"},{at:5.5,cls:'ink-p',text:`To: ${H}`},{at:7.5,cls:'seal',text:'✦',dur:.8}],
+   btns:{at:10,list:[{text:'Break the Seal ✦'}]} },
+
+ { media:'scene7', fb:'hall',
+   lines:[{at:2,cls:'h',text:'Courage. Friendship.'},{at:4,cls:'p',text:'A new beginning.'}],
+   btns:{at:6.5,list:[{text:'Continue ✦'}]} },
+
+ { media:'scene8', fb:'hall', voice:true,
+   subs:[
+     {at:8, dur:4, text:`Dear ${H}…`},
+     {at:12,dur:4, text:'The Mech-A-Verse awaits its next chapter.'},
+     {at:17,dur:4, text:'But every great wizard needs a guide…'},
+     {at:23,dur:3, text:'And I have someone in mind.'},
+     {at:29,dur:3, text:'So, Ma\'am…'},
+     {at:32,dur:6, text:'Will you be my Wizarding GYS for Mech-A-Verse?'}],
+   btns:{at:40,list:[{text:'Continue ✦'}]} },
+
+ { media:'scene9', fb:'hall', pos:'topleft', card:'profile',
+   lines:[{at:1.8,cls:'name',text:H},{at:3.4,cls:'rule',text:'',dur:1.2},
+          {at:4.2,cls:'role',text:'The Guide'},{at:5,cls:'role',text:'The Mentor'},{at:5.8,cls:'role',text:'The GYS'},
+          {at:7.2,cls:'quote',text:'“Because even the best engineers need a little guidance.”',dur:3}],
+   btns:{at:11,list:[{text:'Continue ✦'}]} },
+
+ { media:'scene10', fb:'hall', pos:'right', noskip:true,
+   lines:[{at:1.5,cls:'p',text:`Dear Ma'am,`},
+          {at:3.2,cls:'p',text:'The Mech-A-Verse awaits its next chapter.'},
+          {at:6,cls:'p',text:'But every great wizard needs a guide…'},
+          {at:9,cls:'p',text:'And I have someone in mind.'},
+          {at:12,cls:'big',text:'Will you be my Wizarding GYS for Mech-A-Verse?',dur:3.2}],
+   btns:{at:16.5,yes:true,list:[{text:"Yes, I'd be honoured ✦",act:'yes'},{text:`Of course, ${N}!`,act:'yes'}]} },
+
+ { media:'scene12', fb:'warm', voice:true, auto:true, autoAfter:6,
+   lines:[{at:1,cls:'h',text:'She said yes.',fallbackOnly:true},{at:2.6,cls:'p',text:'The candles burn a little brighter…',fallbackOnly:true}],
+   btns:{at:60,list:[]} },
+
+ { media:'scene14', fb:'hall', voice:true, mechAt:7, mechFallbackAt:3,
+   lines:[{at:9,cls:'title',text:'MECH-A-VERSE',dur:3},{at:12.5,cls:'p',text:'Where magic meets engineering.'}],
+   btns:{at:16,list:[{text:'Step Inside ✦'}]} },
+
+ { media:'scene13', fb:'mech', mech:true,
+   lines:[{at:2,cls:'h',text:'A new kind of wizard.'},{at:4,cls:'p',text:'Gears for spells. Blueprints for scrolls.'}],
+   btns:{at:7,list:[{text:'Continue ✦'}]} },
+
+ { media:'scene15', fb:'mech', mech:true,
+   lines:[{at:2,cls:'h',text:'Side by side.'},{at:4,cls:'p',text:`The quest needs a guide, ${H}.`}],
+   btns:{at:7,list:[{text:'Continue ✦'}]} },
+
+ { media:'scene16', fb:'mech', mech:true, pos:'center', noskip:true, final:true,
+   lines:[{at:2.5,cls:'title',text:'MECH-A-VERSE',dur:3},{at:6.2,cls:'tag',text:'THE QUEST BEGINS.',dur:2.4},
+          ...(CONFIG.EVENT_LINE?[{at:9,cls:'event',text:CONFIG.EVENT_LINE}]:[])],
+   btns:{at:11,list:[
+     ...(CONFIG.WHATSAPP_NUMBER?[{text:'Send my reply ✦',act:'wa'}]:[]),
+     {text:'Watch again ✦',act:'replay',ghost:true}]} }
+];
+
+/* SHORT VERSION: every scene runs at this fraction of its original length (1 = full length). */
+const SHORT = 0.5;
+SCENES.forEach(s=>{
+  (s.lines||[]).forEach(l=>{ l.at*=SHORT; });
+  if(s.btns) s.btns.at*=SHORT;
+  if(s.autoAfter) s.autoAfter*=SHORT;
+  if(s.mechAt!=null) s.mechAt*=SHORT;
+  if(s.mechFallbackAt!=null) s.mechFallbackAt*=SHORT;
+});
+
+/* =====================================================================
+   ENGINE (no need to edit below)
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const stage=$('stage'), fb=$('fb'), pic=$('pic'), blur=$('blur'), vid=$('vid'),
+      cap=$('cap'), btns=$('btns'), sub=$('sub'), skip=$('skip'), toast=$('toast'),
+      bgm1=$('bgm1'), bgm2=$('bgm2'), muteBtn=$('mute'), ccBtn=$('cc');
+
+let cur=-1, run=0, t0=0, pend=[], btnShown=false, btnAt=7, vidState='none', vEnded=false,
+    advanced=false, mechOn=false, soundOn=true, subsOn=CONFIG.SUBTITLES, active=bgm1;
+const BASE_VOL=.55, DUCK_VOL=.12;
+
+/* ---- helpers ---- */
+function fitMedia(el,w,h){
+  if(!w||!h){return;}
+  const r=w/h, vr=innerWidth/innerHeight, k=Math.max(r,vr)/Math.min(r,vr);
+  el.style.objectFit = k>1.35 ? 'contain' : 'cover';
+  el._dims=[w,h];
+}
+addEventListener('resize',()=>{ [pic,vid].forEach(e=>e._dims&&fitMedia(e,e._dims[0],e._dims[1])); resizeCanvas(); });
+
+function setImage(name){
+  const exts=['jpg','jpeg','png','webp']; let i=0;
+  pic.style.display='none'; blur.style.display='none'; pic._dims=null;
+  pic.onerror=()=>{ i++; if(i<exts.length){ pic.src=`assets/${name}.${exts[i]}`; } else { pic.removeAttribute('src'); pic.style.display='none'; } };
+  pic.onload=()=>{ pic.style.display='block'; blur.src=pic.src; blur.style.display='block'; fitMedia(pic,pic.naturalWidth,pic.naturalHeight); };
+  pic.src=`assets/${name}.${exts[0]}`;
+}
+
+function setVideo(name,s,myRun){
+  const exts=['mp4','webm']; let i=0;
+  vidState='loading'; vEnded=false;
+  vid.pause(); vid.style.display='none'; vid._dims=null;
+  vid.muted = !(s.voice && soundOn);
+  vid.onerror=()=>{ if(myRun!==run) return; i++; if(i<exts.length){ vid.src=`assets/${name}.${exts[i]}`; vid.load(); } else { vidState='none'; vid.removeAttribute('src'); vid.style.display='none'; } };
+  vid.onloadedmetadata=()=>fitMedia(vid,vid.videoWidth,vid.videoHeight);
+  vid.onplaying=()=>{ if(myRun!==run) return; vidState='playing'; vid.style.display='block'; };
+  vid.onended=()=>{ if(myRun!==run) return; vEnded=true; flushLines(); };
+  vid.src=`assets/${name}.${exts[0]}`;
+  const pr=vid.play();
+  if(pr&&pr.catch) pr.catch(()=>{ vid.muted=true; const p2=vid.play(); if(p2&&p2.catch)p2.catch(()=>{}); });
+}
+
+/* ---- music ---- */
+function fade(a,to,ms){
+  clearInterval(a._f); const from=a.volume, st=performance.now();
+  a._f=setInterval(()=>{ const k=Math.min(1,(performance.now()-st)/ms);
+    a.volume=Math.max(0,Math.min(1,from+(to-from)*k));
+    if(k>=1){ clearInterval(a._f); if(to===0&&a!==active) a.pause(); } },50);
+}
+function setBgmLevel(duck){ if(!soundOn) return; fade(active, duck?DUCK_VOL:BASE_VOL, 700); }
+function setMech(on){
+  if(on===mechOn) return; mechOn=on; document.body.classList.toggle('mech',on);
+  if(on){
+    bgm2.volume=0;
+    const p=bgm2.play();
+    if(p&&p.then) p.then(()=>{ const old=active; active=bgm2; fade(old,0,2500); fade(bgm2,soundOn?BASE_VOL:0,2500); }).catch(()=>{});
+  } else {
+    if(active===bgm2){ const old=bgm2; active=bgm1; bgm1.play().catch(()=>{}); fade(bgm1,soundOn?BASE_VOL:0,1500); fade(old,0,1500); }
+  }
+}
+
+/* ---- sparks / magic particles ---- */
+const cv=$('sparks'), ctx=cv.getContext('2d'); let W,H_,parts=[],bursts=[];
+function resizeCanvas(){ W=cv.width=innerWidth; H_=cv.height=innerHeight; }
+resizeCanvas();
+for(let i=0;i<70;i++) parts.push({x:Math.random()*W,y:Math.random()*H_,r:Math.random()*1.8+.4,vy:-(Math.random()*.35+.08),vx:(Math.random()-.5)*.2,a:Math.random()*6.28,c:Math.random()<.35?1:0});
+function burst(){
+  for(let i=0;i<150;i++){ const a=Math.random()*6.28, sp=1+Math.random()*6;
+    bursts.push({x:W/2,y:H_*.62,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1.5,life:1,r:Math.random()*2+1}); }
+}
+(function loop(){
+  ctx.clearRect(0,0,W,H_);
+  const c0=mechOn?'255,179,71':'255,224,140', c1=mechOn?'120,210,255':'255,224,140';
+  for(const p of parts){
+    p.x+=p.vx+Math.sin(p.a)*.15; p.y+=p.vy; p.a+=.02;
+    if(p.y<-5){p.y=H_+5;p.x=Math.random()*W;}
+    const col=p.c?c1:c0, g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*5);
+    g.addColorStop(0,`rgba(${col},.85)`); g.addColorStop(1,`rgba(${col},0)`);
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r*5,0,7); ctx.fill();
+  }
+  for(let i=bursts.length-1;i>=0;i--){ const b=bursts[i];
+    b.x+=b.vx; b.y+=b.vy; b.vx*=.97; b.vy=b.vy*.97+.05; b.life-=.012;
+    if(b.life<=0){bursts.splice(i,1);continue;}
+    ctx.fillStyle=`rgba(255,226,150,${b.life})`; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,7); ctx.fill(); }
+  requestAnimationFrame(loop);
+})();
+
+/* ---- decorative gears (mechanical theme) ---- */
+function gearSVG(size,teeth,css){
+  const R=47,r=39,pts=[];
+  for(let i=0;i<teeth;i++){ const a=i/teeth*6.2832, w=3.1416/teeth*.5;
+    [[a-w*.85,r],[a-w*.5,R],[a+w*.5,R],[a+w*.85,r]].forEach(([t,rad])=>pts.push((Math.cos(t)*rad).toFixed(2)+','+(Math.sin(t)*rad).toFixed(2))); }
+  return `<svg viewBox="-50 -50 100 100" width="${size}" height="${size}" style="${css}" fill="none" stroke="currentColor" stroke-width="1.1">
+    <polygon points="${pts.join(' ')}"/><circle r="30"/><circle r="12"/>
+    ${[0,60,120,180,240,300].map(d=>`<line x1="12" y1="0" x2="30" y2="0" transform="rotate(${d})"/>`).join('')}</svg>`;
+}
+$('gears').innerHTML = gearSVG(260,18,'left:-70px;bottom:-70px')+gearSVG(180,14,'right:-40px;top:-40px')+gearSVG(120,10,'right:12%;bottom:10%');
+
+/* ---- scene text ---- */
+function makeLine(l){
+  const d=document.createElement('div'); d.className='line '+l.cls; d.textContent=l.text||'';
+  d.style.setProperty('--dur',(l.dur||Math.max(1.2,(l.text||'').length*.045))+'s');
+  cap.appendChild(d);
+}
+function flushLines(){
+  const s=SCENES[cur]; if(!s) return;
+  const rest=pend.splice(0).filter(l=>!(l.fallbackOnly&&vidState!=='none'));
+  rest.forEach((l,k)=>setTimeout(()=>{ if(SCENES[cur]===s) makeLine(l); },k*1200));
+}
+function showBtns(){
+  const s=SCENES[cur]; btnShown=true; btns.innerHTML='';
+  s.btns.list.forEach(b=>{
+    const e=document.createElement('button'); e.className='btn'+(b.ghost?' ghost':''); e.textContent=b.text;
+    e.onclick=()=>onBtn(b); btns.appendChild(e);
+  });
+  if(s.btns.yes && CONFIG.SHOW_THINK){
+    const e=document.createElement('button'); e.className='btn ghost'; e.textContent='Let me think ✦';
+    e.onclick=()=>say(`Take all the time you need, ${H}… the gates will wait. ✦`); btns.appendChild(e);
+  }
+}
+function say(msg){ toast.textContent=msg; toast.classList.add('on'); clearTimeout(say._t); say._t=setTimeout(()=>toast.classList.remove('on'),3800); }
+function onBtn(b){
+  if(b.act==='yes'){ burst(); btns.innerHTML=''; setTimeout(()=>next(),1400); return; }
+  if(b.act==='wa'){ window.open(`https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(CONFIG.REPLY_TEXT)}`,'_blank'); return; }
+  if(b.act==='replay'){ setMech(false); showScene(0); return; }
+  next();
+}
+function next(){ if(cur<SCENES.length-1) showScene(cur+1); }
+skip.onclick=()=>next();
+
+/* ---- scene player ---- */
+function showScene(i){
+  const myRun=++run; cur=-1; pend=[]; document.body.classList.add('dim'); skip.style.display='none';
+  const go=()=>{
+    if(myRun!==run) return;
+    const s=SCENES[i]; cur=i;
+    document.body.dataset.pos=s.pos||'bottom';
+    fb.className='fb-'+(s.fb||'castle');
+    cap.innerHTML=''; cap.className=s.card?'card-'+s.card:''; btns.innerHTML=''; sub.classList.remove('on');
+    if(s.mech) setMech(true);
+    setImage(s.media); setVideo(s.media,s,myRun);
+    pend=(s.lines||[]).map(l=>({...l})).sort((a,b)=>a.at-b.at);
+    btnShown=false; btnAt=s.btns?s.btns.at:7; advanced=false; t0=performance.now();
+    setBgmLevel(!!s.voice);
+    document.body.classList.remove('dim');
+  };
+  if(i===0) go(); else setTimeout(go,800);   // first scene runs inside the tap so sound is allowed
+}
+
+/* ---- timeline ---- */
+(function tick(){
+  if(cur>=0){
+    const s=SCENES[cur], el=(performance.now()-t0)/1000;
+    while(pend.length && pend[0].at<=el){
+      const l=pend.shift();
+      if(!(l.fallbackOnly && vidState!=='none')) makeLine(l);
+    }
+    if(!btnShown && s.btns && s.btns.list.length && (el>=btnAt || (vEnded&&el>2))) showBtns();
+    if(s.mechAt!=null && !mechOn && el>=(vidState==='playing'?s.mechAt:(s.mechFallbackAt||2))) setMech(true);
+    if(s.auto && !advanced && (vEnded || (vidState==='none' && el>=(s.autoAfter||6)))){
+      advanced=true; const r=run; setTimeout(()=>{ if(r===run) next(); },900);
+    }
+    if(s.subs){
+      const ct = vidState==='playing' ? vid.currentTime : el/SHORT;
+      const hit = s.subs.find(x=>ct>=x.at && ct<x.at+x.dur);
+      if(hit && subsOn){ if(sub.textContent!==hit.text) sub.textContent=hit.text; sub.classList.add('on'); }
+      else sub.classList.remove('on');
+    } else sub.classList.remove('on');
+    if(el>3 && !s.noskip && !s.auto && !(s.final)) skip.style.display='block';
+  }
+  requestAnimationFrame(tick);
+})();
+
+/* ---- controls ---- */
+$('enterBtn').addEventListener('click',()=>{
+  bgm1.volume=BASE_VOL; bgm1.play().catch(()=>{});
+  muteBtn.style.display='flex'; ccBtn.style.display='flex';
+  $('enter').classList.add('hide');
+  showScene(0);
+});
+muteBtn.addEventListener('click',()=>{
+  soundOn=!soundOn; muteBtn.textContent=soundOn?'🔊':'🔇';
+  [bgm1,bgm2].forEach(a=>a.muted=!soundOn);
+  const s=SCENES[cur]; vid.muted=!(soundOn && s && s.voice);
+});
+ccBtn.addEventListener('click',()=>{ subsOn=!subsOn; ccBtn.classList.toggle('off',!subsOn); });
+</script>
+</body>
+</html>
